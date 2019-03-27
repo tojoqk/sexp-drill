@@ -1,51 +1,44 @@
 #lang racket/base
 
-(module+ test
-  (require rackunit))
+(struct question (name
+                  description procedure-name
+                  answer input-cases
+                  require-spec))
 
-;; Notice
-;; To install (from within the package directory):
-;;   $ raco pkg install
-;; To install (once uploaded to pkgs.racket-lang.org):
-;;   $ raco pkg install <<name>>
-;; To uninstall:
-;;   $ raco pkg remove <<name>>
-;; To view documentation:
-;;   $ raco docs <<name>>
-;;
-;; For your convenience, we have included a LICENSE.txt file, which links to
-;; the GNU Lesser General Public License.
-;; If you would prefer to use a different license, replace LICENSE.txt with the
-;; desired license.
-;;
-;; Some users like to add a `private/` directory, place auxiliary files there,
-;; and require them in `main.rkt`.
-;;
-;; See the current version of the racket style guide here:
-;; http://docs.racket-lang.org/style/index.html
+(define-syntax define-question
+  (syntax-rules ()
+    [(_ name
+        description
+        procedure-name
+        answer
+        ([case-description input] ...)
+        require-spec)
+     (begin
+       (define name
+         (question 'name
+                   description
+                   procedure-name
+                   answer
+                   (list (cons case-description input) ...)
+                   'require-spec))
+       (provide name))]))
+(provide define-question)
 
-;; Code here
+(define (question-test question code)
+  (define ns (make-base-empty-namespace))
+  (define input-cases (question-input-cases question))
+  (define procedure-name (question-procedure-name question))
+  (parameterize ([current-namespace ns])
+    (namespace-require '(only racket/base #%app #%top #%datum define if cond else apply quote))
+    (namespace-require (question-require-spec question))
+    (eval code)
+    (andmap
+     (lambda (input-case)
+       (displayln (car input-case))
+       (define args ((cdr input-case)))
+       (equal?
+        (apply (question-answer question) args)
 
-
-
-(module+ test
-  ;; Any code in this `test` submodule runs when this file is run using DrRacket
-  ;; or with `raco test`. The code here does not run when this file is
-  ;; required by another module.
-
-  (check-equal? (+ 2 2) 4))
-
-(module+ main
-  ;; (Optional) main submodule. Put code here if you need it to be executed when
-  ;; this file is run using DrRacket or the `racket` executable.  The code here
-  ;; does not run when this file is required by another module. Documentation:
-  ;; http://docs.racket-lang.org/guide/Module_Syntax.html#%28part._main-and-test%29
-
-  (require racket/cmdline)
-  (define who (box "world"))
-  (command-line
-    #:program "my-program"
-    #:once-each
-    [("-n" "--name") name "Who to say hello to" (set-box! who name)]
-    #:args ()
-    (printf "hello ~a~n" (unbox who))))
+        (eval `(apply ,procedure-name ',args))))
+     input-cases)))
+(provide question-test)
