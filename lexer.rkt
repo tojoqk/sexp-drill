@@ -4,7 +4,7 @@
 (define drill-lexer
   (lexer-src-pos
    [(:or "@description" "@question"
-         "@answer" "@require" "@input")
+         "@answer" "@require" "@test")
     (token lexeme lexeme)]
    [(:or (:: "\n"
              (:& (char-complement "@")
@@ -19,9 +19,7 @@
     (token 'INTEGER (string->number lexeme))]
    ["(" (token 'LEFT-PAREN lexeme)]
    [")" (token 'RIGHT-PAREN lexeme)]
-   [(:or (from/to "\"" "\""))
-    (token 'STRING
-           (substring lexeme
-                      1 (sub1 (string-length lexeme))))]
+   [(from/to "\"" "\"")
+    (token 'STRING (trim-ends "\"" lexeme "\""))]
    [(eof) (void)]))
 (provide drill-lexer)

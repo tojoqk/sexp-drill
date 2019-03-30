@@ -1,16 +1,11 @@
 #lang brag
 
-drill        : introduction require? (description | question)*
-description  : "@description" STRING lines
-question     : "@question" IDENTIFIER STRING lines require? answer input
-answer       : "@answer" IDENTIFIER sexprs
-input        : "@input" sexprs
-require      : "@require" sexprs
-introduction : lines
-lines        : LINE*
-sexprs       : LINE*
-
-
-
-
-
+%%drill        : %%introduction (%%description | %%question)*
+%%description  : "@description" STRING %%containts
+%%question     : "@question" IDENTIFIER STRING %%containts %%require? %%answer %%test
+%%answer       : "@answer" %%sexprs
+%%test         : "@test" IDENTIFIER %%sexprs
+%%require      : "@require" %%sexprs
+%%introduction : %%containts
+%%containts    : LINE*
+%%sexprs       : LINE*
