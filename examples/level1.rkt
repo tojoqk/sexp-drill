@@ -4,19 +4,14 @@
 (only racket/base
       #%app #%top #%datum
       define let if lambda cond => else
-      quote quasiquote unquote unquote-splicing)
+      quote quasiquote unquote unquote-splicing
+      cons car cdr null?)
 
-@description 再帰手続きについて
+@description "再帰手続きについて"
 
-それでは、簡単な再帰手続きを記述する方法について説明しよう。
+簡単な再帰手続きを記述する方法について説明しよう。
 
-...
-...
-
-@question 二つのリストを連結しなさい
-
-@require
-(only racket/base cons car cdr null?)
+@question append "二つのリストを連結しなさい"
 
 @answer append
 
@@ -32,14 +27,12 @@
  (for/list ([i (random 10)]) (random 100))
  (for/list ([i (random 10)]) (random 100)))
 
-@description 末尾再帰手続きについて
+@description "末尾再帰手続きについて"
 
-@question リストを反転させなさい
-
-@require
-(only racket/base cons car cdr null?)
+@question reverse "リストを反転させなさい"
 
 @answer reverse
+
 (define (reverse lst)
   (define (rev lst acc)
     (cond
@@ -48,3 +41,10 @@
        (rev (cdr lst)
             (cons (car lst) acc))]))
   (rev lst '()))
+
+@input
+(list
+ (for/list ([i (random 10)]) (random 100))
+ (for/list ([i (random 10)]) (random 100)))
+
+
